@@ -50,6 +50,11 @@ if (!empty($_COOKIE['save'])) {
     }
 }
 
+if (!empty($_COOKIE['error_hint'])) {
+    $messages['error_hint'] = (string)$_COOKIE['error_hint'];
+    landing_del_cookie('error_hint');
+}
+
 if ($anyErr) $messages['error_hint'] = 'Исправьте ошибки в форме.';
 
 function fieldVal($key) { global $values; return landing_h($values[$key] ?? ''); }
@@ -99,6 +104,7 @@ function errMsg($key) { global $errors; return landing_h($errors[$key] ?? ''); }
                     <li><a href="#tariffs" class="nav-link">Тарифы</a></li>
                     <li><a href="#reviews" class="nav-link">Отзывы</a></li>
                     <li><a href="#contacts" class="nav-link">Контакты</a></li>
+                    <li><a href="login.php" class="nav-link">Вход</a></li>
                 </ul>
             </nav>
         </div>
@@ -115,9 +121,6 @@ function errMsg($key) { global $errors; return landing_h($errors[$key] ?? ''); }
                 <h1 class="hero-title">KittyCAT - Мы создаем самый вкусный корм для ваших котят!</h1>
                 <p class="hero-subtitle">Индивидуальный подход к каждому пушистому другу</p>
                 <a href="#contacts" class="hero-btn">Связаться с нами</a>
-                <div style="margin-top: 12px;">
-                    <a href="login.php" class="nav-link" style="padding:0;display:inline-block">Войти</a>
-                </div>
             </div>
             <div class="hero-features">
                 <div class="feature-item">

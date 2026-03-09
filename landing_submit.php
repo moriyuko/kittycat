@@ -62,6 +62,7 @@ if (landing_str_char_len($comment) > 2000) {
 }
 
 if ($hasErr) {
+    landing_set_error_cookie('error_hint', 'Исправьте ошибки в форме.');
     json_error('Исправьте ошибки в форме.', 422);
 }
 
@@ -114,10 +115,12 @@ try {
     }
 
     landing_set_temp_cookie('save', '1');
+    landing_del_cookie('error_hint');
 
     echo json_encode(['ok' => true, 'credentials' => $credentials], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {
     error_log('[landing_submit.php] DB error: ' . $e->getMessage());
+    landing_set_error_cookie('error_hint', 'Ошибка сервера. Попробуйте позже.');
     json_error('Ошибка сервера. Попробуйте позже.', 500);
 }
