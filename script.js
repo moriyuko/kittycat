@@ -136,6 +136,26 @@ reviewsCarousel.addEventListener('mouseleave', startCarousel);
 const contactForm = document.getElementById('contactForm');
 const formMessage = document.getElementById('formMessage');
 
+function clearFieldErrors(form) {
+    form.querySelectorAll('[data-field-error]').forEach((el) => el.remove());
+}
+
+function showFieldErrors(form, fields) {
+    if (!fields) return;
+    Object.keys(fields).forEach((name) => {
+        const input = form.querySelector(`[name="${CSS.escape(name)}"]`);
+        if (!input) return;
+
+        const group = input.closest('.form-group') || input.parentElement;
+        const err = document.createElement('div');
+        err.setAttribute('data-field-error', '1');
+        err.style.color = '#c0392b';
+        err.style.fontSize = '.85rem';
+        err.textContent = fields[name];
+        group.appendChild(err);
+    });
+}
+
 contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -155,6 +175,7 @@ contactForm.addEventListener('submit', async (e) => {
     submitBtn.textContent = 'Отправка...';
     submitBtn.disabled = true;
     formMessage.style.display = 'none';
+    clearFieldErrors(contactForm);
 
     try {
         const response = await fetch(endpoint, {
@@ -168,19 +189,32 @@ contactForm.addEventListener('submit', async (e) => {
         const result = await response.json().catch(() => null);
 
         if (response.ok && result && result.ok) {
-            formMessage.textContent = 'Спасибо! Ваша заявка успешно отправлена. Мы свяжемся с вами в ближайшее время.';
-            formMessage.className = 'form-message success';
-            contactForm.reset();
+            let msg = 'Спасибо! Ваша заявка успешно отправлена. Мы свяжемся с вами в ближайшее время.';
+            if (result.credentials && result.credentials.login && result.credentials.password) {
+                msg += `\n\nЗапомните: логин ${result.credentials.login}, пароль ${result.credentials.password}.`;
+            }
 
-            window.location.href = 'index.php#contacts';
+            formMessage.textContent = msg;
+            formMessage.className = 'form-message success';
+            formMessage.style.display = 'block';
+            contactForm.reset();
             return;
-        } else {
-            throw new Error((result && result.error) || 'Ошибка отправки формы');
         }
+
+        if (response.status === 422 && result && result.fields) {
+            formMessage.textContent = result.error || 'Исправьте ошибки в форме.';
+            formMessage.className = 'form-message error';
+            formMessage.style.display = 'block';
+            showFieldErrors(contactForm, result.fields);
+            return;
+        }
+
+        throw new Error((result && result.error) || 'Ошибка отправки формы');
     } catch (error) {
         console.error('Form submission error:', error);
         formMessage.textContent = 'Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз или свяжитесь с нами по телефону.';
         formMessage.className = 'form-message error';
+        formMessage.style.display = 'block';
     } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;

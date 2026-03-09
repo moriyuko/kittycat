@@ -9,6 +9,12 @@ function json_error($message, $code = 400) {
     exit();
 }
 
+function json_error_fields($message, $fields, $code = 422) {
+    http_response_code($code);
+    echo json_encode(['ok' => false, 'error' => $message, 'fields' => $fields], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_error('Method not allowed', 405);
 }
@@ -19,11 +25,13 @@ $email = trim($_POST['email'] ?? '');
 $comment = trim($_POST['comment'] ?? '');
 
 $hasErr = false;
+$fieldErrors = [];
 
 // cookie-based errors/values like in backend
 if ($name === '' || landing_str_char_len($name) > 100) {
     landing_set_error_cookie('err_name', 'Укажите имя (до 100 символов).');
     landing_set_temp_cookie('val_name', $name);
+    $fieldErrors['name'] = 'Укажите имя (до 100 символов).';
     $hasErr = true;
 } else {
     landing_set_perm_cookie('val_name', $name);
@@ -32,10 +40,12 @@ if ($name === '' || landing_str_char_len($name) > 100) {
 if ($phone === '') {
     landing_set_error_cookie('err_phone', 'Укажите телефон.');
     landing_set_temp_cookie('val_phone', $phone);
+    $fieldErrors['phone'] = 'Укажите телефон.';
     $hasErr = true;
 } elseif (!preg_match('/^\+?[\d\s\-\(\)]{7,20}$/', $phone)) {
     landing_set_error_cookie('err_phone', 'Телефон: допустимы цифры, +, (, ), пробел, дефис (7–20 знаков).');
     landing_set_temp_cookie('val_phone', $phone);
+    $fieldErrors['phone'] = 'Телефон: допустимы цифры, +, (, ), пробел, дефис (7–20 знаков).';
     $hasErr = true;
 } else {
     landing_set_perm_cookie('val_phone', $phone);
@@ -44,10 +54,12 @@ if ($phone === '') {
 if ($email === '') {
     landing_set_error_cookie('err_email', 'Укажите e-mail.');
     landing_set_temp_cookie('val_email', $email);
+    $fieldErrors['email'] = 'Укажите e-mail.';
     $hasErr = true;
 } elseif (!preg_match('/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/', $email) || landing_str_char_len($email) > 255) {
     landing_set_error_cookie('err_email', 'E-mail: введите адрес вида name@domain.ru.');
     landing_set_temp_cookie('val_email', $email);
+    $fieldErrors['email'] = 'E-mail: введите адрес вида name@domain.ru.';
     $hasErr = true;
 } else {
     landing_set_perm_cookie('val_email', $email);
@@ -56,6 +68,7 @@ if ($email === '') {
 if (landing_str_char_len($comment) > 2000) {
     landing_set_error_cookie('err_comment', 'Комментарий слишком длинный (до 2000 символов).');
     landing_set_temp_cookie('val_comment', $comment);
+    $fieldErrors['comment'] = 'Комментарий слишком длинный (до 2000 символов).';
     $hasErr = true;
 } else {
     landing_set_perm_cookie('val_comment', $comment);
@@ -63,7 +76,7 @@ if (landing_str_char_len($comment) > 2000) {
 
 if ($hasErr) {
     landing_set_error_cookie('error_hint', 'Исправьте ошибки в форме.');
-    json_error('Исправьте ошибки в форме.', 422);
+    json_error_fields('Исправьте ошибки в форме.', $fieldErrors, 422);
 }
 
 function gen_login($db) {
@@ -114,6 +127,10 @@ try {
         landing_set_temp_cookie('new_pass', $plainPass);
     }
 
+    landing_del_cookie('err_name');
+    landing_del_cookie('err_phone');
+    landing_del_cookie('err_email');
+    landing_del_cookie('err_comment');
     landing_set_temp_cookie('save', '1');
     landing_del_cookie('error_hint');
 
