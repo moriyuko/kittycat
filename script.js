@@ -147,7 +147,7 @@ contactForm.addEventListener('submit', async (e) => {
         comment: formData.get('comment')
     };
 
-    const endpoint = 'lead_submit.php';
+    const endpoint = 'landing_submit.php';
     
     // Show loading state
     const submitBtn = contactForm.querySelector('.submit-btn');
@@ -171,6 +171,9 @@ contactForm.addEventListener('submit', async (e) => {
             formMessage.textContent = 'Спасибо! Ваша заявка успешно отправлена. Мы свяжемся с вами в ближайшее время.';
             formMessage.className = 'form-message success';
             contactForm.reset();
+
+            window.location.href = 'landing_form.php';
+            return;
         } else {
             throw new Error((result && result.error) || 'Ошибка отправки формы');
         }
