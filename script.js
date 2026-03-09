@@ -172,7 +172,7 @@ contactForm.addEventListener('submit', async (e) => {
             formMessage.className = 'form-message success';
             contactForm.reset();
 
-            window.location.href = 'landing_form.php';
+            window.location.href = 'index.php#contacts';
             return;
         } else {
             throw new Error((result && result.error) || 'Ошибка отправки формы');

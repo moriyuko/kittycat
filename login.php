@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <button type="submit">Войти</button>
     </form>
 
-    <a class="back" href="index.html">← На лендинг</a>
+    <a class="back" href="index.php">← На лендинг</a>
   </div>
 </body>
 </html>
