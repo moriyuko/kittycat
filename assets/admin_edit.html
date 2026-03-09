@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Редактирование пользователя</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+  <main style="max-width: 700px; margin: 0 auto; padding: 24px;">
+    <h1 style="margin-bottom:12px;">Пользователь #{{id}}</h1>
+
+    <div style="margin-bottom:12px;">
+      {{errors}}
+    </div>
+
+    <form method="post" action="/admin/user/{{id}}" style="display:grid; gap: 12px;">
+      <input type="hidden" name="_method" value="PUT" />
+
+      <label>
+        <div>Имя</div>
+        <input type="text" name="name" value="{{name}}" required />
+      </label>
+
+      <label>
+        <div>Телефон</div>
+        <input type="text" name="phone" value="{{phone}}" required />
+      </label>
+
+      <label>
+        <div>Email</div>
+        <input type="email" name="email" value="{{email}}" required />
+      </label>
+
+      <label>
+        <div>Комментарий</div>
+        <textarea name="comment" rows="5">{{comment}}</textarea>
+      </label>
+
+      <label>
+        <div>Логин (не редактируется)</div>
+        <input type="text" value="{{login}}" readonly />
+      </label>
+
+      <label>
+        <div>Пароль (не редактируется)</div>
+        <input type="text" value="{{password}}" readonly />
+      </label>
+
+      <button type="submit">Сохранить</button>
+    </form>
+
+    <form method="post" action="/admin/user/{{id}}" style="margin-top: 12px;">
+      <input type="hidden" name="_method" value="DELETE" />
+      <button type="submit">Удалить</button>
+    </form>
+
+    <div style="margin-top:16px;">
+      <a href="/admin">Назад к списку</a>
+    </div>
+  </main>
+</body>
+</html>
