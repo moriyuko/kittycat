@@ -134,7 +134,14 @@ reviewsCarousel.addEventListener('mouseleave', startCarousel);
 
 // Form Submission
 const contactForm = document.getElementById('contactForm');
-const formMessage = document.getElementById('formMessage');
+let formMessage = document.getElementById('formMessage');
+
+if (contactForm && !formMessage) {
+    formMessage = document.createElement('div');
+    formMessage.className = 'form-message';
+    formMessage.id = 'formMessage';
+    contactForm.appendChild(formMessage);
+}
 
 function clearFieldErrors(form) {
     form.querySelectorAll('[data-field-error]').forEach((el) => el.remove());
@@ -156,7 +163,7 @@ function showFieldErrors(form, fields) {
     });
 }
 
-contactForm.addEventListener('submit', async (e) => {
+if (contactForm) contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const formData = new FormData(contactForm);
@@ -174,7 +181,7 @@ contactForm.addEventListener('submit', async (e) => {
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Отправка...';
     submitBtn.disabled = true;
-    formMessage.style.display = 'none';
+    if (formMessage) formMessage.style.display = 'none';
     clearFieldErrors(contactForm);
 
     try {
@@ -187,6 +194,7 @@ contactForm.addEventListener('submit', async (e) => {
         });
 
         const result = await response.json().catch(() => null);
+        console.log('[lead submit]', response.status, result);
 
         if (response.ok && result && result.ok) {
             let msg = 'Спасибо! Ваша заявка успешно отправлена. Мы свяжемся с вами в ближайшее время.';
@@ -194,17 +202,21 @@ contactForm.addEventListener('submit', async (e) => {
                 msg += `\n\nЗапомните: логин ${result.credentials.login}, пароль ${result.credentials.password}.`;
             }
 
-            formMessage.textContent = msg;
-            formMessage.className = 'form-message success';
-            formMessage.style.display = 'block';
+            if (formMessage) {
+                formMessage.textContent = msg;
+                formMessage.className = 'form-message success';
+                formMessage.style.display = 'block';
+            }
             contactForm.reset();
             return;
         }
 
         if (response.status === 422 && result && result.fields) {
-            formMessage.textContent = result.error || 'Исправьте ошибки в форме.';
-            formMessage.className = 'form-message error';
-            formMessage.style.display = 'block';
+            if (formMessage) {
+                formMessage.textContent = result.error || 'Исправьте ошибки в форме.';
+                formMessage.className = 'form-message error';
+                formMessage.style.display = 'block';
+            }
             showFieldErrors(contactForm, result.fields);
             return;
         }
@@ -212,9 +224,11 @@ contactForm.addEventListener('submit', async (e) => {
         throw new Error((result && result.error) || 'Ошибка отправки формы');
     } catch (error) {
         console.error('Form submission error:', error);
-        formMessage.textContent = 'Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз или свяжитесь с нами по телефону.';
-        formMessage.className = 'form-message error';
-        formMessage.style.display = 'block';
+        if (formMessage) {
+            formMessage.textContent = 'Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз или свяжитесь с нами по телефону.';
+            formMessage.className = 'form-message error';
+            formMessage.style.display = 'block';
+        }
     } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
